@@ -638,10 +638,49 @@ function showPropertySuggestions() {
   const words = currentLine.trim().split(/\s+/);
   const lastWord = words[words.length - 1] || '';
   
-  // Filter properties that match the current typing
-  const suggestions = cssProperties.filter(prop => 
-    prop.toLowerCase().startsWith(lastWord.toLowerCase())
-  );
+  // Filter properties that match the current typing (type-ahead support)
+  const searchTerm = lastWord.toLowerCase();
+  const suggestions = cssProperties.filter(prop => {
+    const propLower = prop.toLowerCase();
+    
+    // Exact prefix match gets highest priority
+    if (propLower.startsWith(searchTerm)) {
+      return true;
+    }
+    
+    // Contains match (type-ahead functionality)
+    if (propLower.includes(searchTerm)) {
+      return true;
+    }
+    
+    // Fuzzy match for abbreviations (e.g., "ani" matches "animation")
+    const searchChars = searchTerm.split('');
+    let propIndex = 0;
+    for (const char of searchChars) {
+      const foundIndex = propLower.indexOf(char, propIndex);
+      if (foundIndex === -1) return false;
+      propIndex = foundIndex + 1;
+    }
+    return true;
+  }).sort((a, b) => {
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+    
+    // Sort by relevance:
+    // 1. Exact prefix matches first
+    if (aLower.startsWith(searchTerm) && !bLower.startsWith(searchTerm)) return -1;
+    if (!aLower.startsWith(searchTerm) && bLower.startsWith(searchTerm)) return 1;
+    
+    // 2. Then by contains matches (closer to start is better)
+    if (aLower.includes(searchTerm) && bLower.includes(searchTerm)) {
+      const aIndex = aLower.indexOf(searchTerm);
+      const bIndex = bLower.indexOf(searchTerm);
+      if (aIndex !== bIndex) return aIndex - bIndex;
+    }
+    
+    // 3. Finally alphabetical
+    return a.localeCompare(b);
+  });
   
   if (suggestions.length > 0) {
     currentSuggestions = suggestions;
@@ -650,6 +689,41 @@ function showPropertySuggestions() {
     console.log('Setting up suggestions:', suggestions.length, 'items, selected index:', selectedSuggestionIndex);
     showSuggestionPanel(suggestions, lastWord);
   }
+}
+
+function highlightMatch(text, searchTerm) {
+  if (!searchTerm || searchTerm.length === 0) {
+    return text;
+  }
+  
+  const lowerText = text.toLowerCase();
+  const lowerSearch = searchTerm.toLowerCase();
+  
+  // For exact substring matches, highlight the whole match
+  if (lowerText.includes(lowerSearch)) {
+    const index = lowerText.indexOf(lowerSearch);
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + searchTerm.length);
+    const after = text.substring(index + searchTerm.length);
+    return `${before}<mark style="background: rgba(255,255,255,0.3); color: inherit; padding: 0; border-radius: 2px;">${match}</mark>${after}`;
+  }
+  
+  // For fuzzy matches, highlight individual characters
+  let result = '';
+  let searchIndex = 0;
+  const searchChars = lowerSearch.split('');
+  
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (searchIndex < searchChars.length && char.toLowerCase() === searchChars[searchIndex]) {
+      result += `<mark style="background: rgba(255,255,255,0.3); color: inherit; padding: 0; border-radius: 2px;">${char}</mark>`;
+      searchIndex++;
+    } else {
+      result += char;
+    }
+  }
+  
+  return result;
 }
 
 function showSuggestionPanel(suggestions, word) {
@@ -690,10 +764,9 @@ function showSuggestionPanel(suggestions, word) {
   `;
   suggestionPanel.appendChild(header);
   
-  // Add suggestions
+  // Add suggestions with highlighting
   suggestions.slice(0, 12).forEach((suggestion, index) => {
     const item = document.createElement('div');
-    item.textContent = suggestion;
     item.className = 'suggestion-item';
     item.dataset.index = index;
     item.style.cssText = `
@@ -705,6 +778,9 @@ function showSuggestionPanel(suggestions, word) {
       align-items: center;
       font-weight: 400;
     `;
+    
+    // Highlight matching characters
+    item.innerHTML = highlightMatch(suggestion, word);
     
     // Highlight selected item
     if (index === selectedSuggestionIndex) {
@@ -727,7 +803,7 @@ function showSuggestionPanel(suggestions, word) {
   
   // Add footer with keyboard hints
   const footer = document.createElement('div');
-  footer.innerHTML = '↑↓ Navigate • ⏎ Select • ⎋ Close';
+  footer.innerHTML = '↑↓ Navigate • ⏎ Select • ⎋ Close • Type to filter';
   footer.style.cssText = `
     padding: 6px 12px;
     background: #f8f9fa;
