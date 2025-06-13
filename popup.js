@@ -618,6 +618,7 @@ let suggestionPanel = null;
 let selectedSuggestionIndex = -1;
 let currentSuggestions = [];
 let currentWord = '';
+let autoHideTimeout = null;
 
 // CSS properties list
 const CSS_PROPERTIES = [
@@ -725,11 +726,74 @@ function updateSuggestionsFromCurrentText() {
     currentSuggestions = suggestions;
     currentWord = lastWord;
     selectedSuggestionIndex = 0; // Reset to first item
-    showSuggestionPanel(suggestions, lastWord);
+    
+    // If panel exists, update it; otherwise create new one
+    const existingPanel = document.getElementById('suggestion-panel');
+    if (existingPanel) {
+      console.log('Updating existing panel content');
+      updateSuggestionPanelContent(suggestions, lastWord);
+    } else {
+      console.log('Creating new panel');
+      showSuggestionPanel(suggestions, lastWord);
+    }
   } else {
     console.log('No suggestions found, closing panel');
     closeSuggestionPanel();
   }
+}
+
+function updateSuggestionPanelContent(suggestions, word) {
+  const panel = document.getElementById('suggestion-panel');
+  if (!panel) return;
+  
+  // Find the suggestions container (everything between header and footer)
+  const header = panel.querySelector('div:first-child');
+  const footer = panel.querySelector('div:last-child');
+  
+  // Remove all existing suggestion items
+  const existingItems = panel.querySelectorAll('.suggestion-item');
+  existingItems.forEach(item => item.remove());
+  
+  // Add new suggestions
+  suggestions.slice(0, 12).forEach((suggestion, index) => {
+    const item = document.createElement('div');
+    item.className = 'suggestion-item';
+    item.dataset.index = index;
+    item.style.cssText = `
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      font-weight: 400;
+    `;
+    
+    // Highlight matching characters
+    item.innerHTML = highlightMatch(suggestion, word);
+    
+    // Highlight selected item
+    if (index === selectedSuggestionIndex) {
+      item.style.backgroundColor = '#667eea';
+      item.style.color = 'white';
+    }
+    
+    item.addEventListener('mouseenter', () => {
+      selectedSuggestionIndex = index;
+      updateSuggestionSelection();
+    });
+    
+    item.addEventListener('click', () => {
+      insertSuggestion(suggestion, word);
+      closeSuggestionPanel();
+    });
+    
+    // Insert before footer
+    panel.insertBefore(item, footer);
+  });
+  
+  // Reset auto-hide timer since we're actively using the panel
+  resetAutoHideTimer();
 }
 
 function highlightMatch(text, searchTerm) {
@@ -866,10 +930,8 @@ function showSuggestionPanel(suggestions, word) {
   
   document.body.appendChild(suggestionPanel);
   
-  // Auto-hide after 10 seconds
-  setTimeout(() => {
-    closeSuggestionPanel();
-  }, 10000);
+  // Set up auto-hide timer (reset any existing timer)
+  resetAutoHideTimer();
 }
 
 function updateSuggestionSelection() {
@@ -897,7 +959,28 @@ function updateSuggestionSelection() {
   });
 }
 
+function resetAutoHideTimer() {
+  // Clear existing timer
+  if (autoHideTimeout) {
+    clearTimeout(autoHideTimeout);
+  }
+  
+  // Set new timer (15 seconds for type-ahead)
+  autoHideTimeout = setTimeout(() => {
+    console.log('Auto-hiding suggestion panel after timeout');
+    closeSuggestionPanel();
+  }, 15000);
+}
+
 function closeSuggestionPanel() {
+  console.log('Closing suggestion panel');
+  
+  // Clear auto-hide timer
+  if (autoHideTimeout) {
+    clearTimeout(autoHideTimeout);
+    autoHideTimeout = null;
+  }
+  
   if (suggestionPanel && suggestionPanel.parentNode) {
     suggestionPanel.remove();
   }
