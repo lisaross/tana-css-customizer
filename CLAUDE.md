@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-This is a Chrome Extension (Manifest V3) that allows users to customize Tana's CSS styling through a popup interface. The extension includes a professional CSS editor with syntax highlighting, linting, auto-completion, and real-time preview.
+This is a Chrome Extension (Manifest V3) that allows users to customize Tana's CSS styling through a popup interface. The extension includes a professional CSS editor with syntax highlighting, intelligent auto-completion with type-ahead filtering, real-time linting, code formatting, and live preview functionality.
 
 ## Commands
 
@@ -27,8 +27,8 @@ Load the extension in Chrome:
 - `content.css` - Default content styles
 
 ### Key Components
-- **CSS Editor**: Professional editor with linting, auto-completion, and formatting
-- **Preset System**: Built-in themes (dark, larger text, compact view, custom colors)  
+- **CSS Editor**: Professional editor with syntax highlighting, linting, and intelligent auto-completion
+- **Smart Autocomplete**: Advanced CSS property suggestions with type-ahead filtering and keyboard navigation
 - **Storage**: Uses Chrome's sync storage API for persistence
 - **Content Script Injection**: Only runs on `https://app.tana.inc/*`
 
@@ -43,8 +43,51 @@ Load the extension in Chrome:
 - `activeTab`, `scripting`, `tabs` - For content script injection
 - Host permission: `https://app.tana.inc/*` only
 
+## Enhanced Autocomplete System
+
+### CSS Property Suggestions
+- **Trigger**: `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux) 
+- **Alternative**: `Ctrl+Space` for cross-platform compatibility
+- **Properties**: 60+ common CSS properties including animations, flexbox, grid, and transforms
+
+### Smart Filtering Modes
+1. **Prefix Match** (highest priority): `"back"` → background, background-color, background-image
+2. **Contains Match** (medium priority): `"size"` → font-size, background-size, box-sizing  
+3. **Fuzzy Match** (lowest priority): `"ani"` → animation, animation-delay, animation-duration
+
+### Keyboard Navigation
+- **↑/↓ Arrow Keys**: Navigate through suggestions
+- **Enter**: Insert selected property with colon
+- **Escape**: Close suggestion panel
+- **Type-ahead**: Continue typing to filter suggestions in real-time
+- **Mouse**: Click or hover to select suggestions
+
+### Visual Features
+- **Highlighted Matches**: Matching characters are visually highlighted
+- **Smart Sorting**: Most relevant suggestions appear first
+- **Professional UI**: Modern design with gradient header and keyboard hints
+- **Auto-positioning**: Panel positioned intelligently near cursor
+- **Auto-hide**: Panel closes after 15 seconds of inactivity
+
+## Recent Major Changes
+
+### v1.1 - Enhanced Autocomplete & Simplified UI
+- **Removed**: Preset system (dark theme, larger text, compact view, custom colors)
+- **Added**: Intelligent CSS property autocomplete with type-ahead filtering
+- **Enhanced**: Professional suggestion panel with keyboard navigation
+- **Improved**: Real-time filtering and smart matching algorithms
+- **Focused**: Extension now concentrates on custom CSS editing rather than presets
+
+### Rationale for Changes
+- **Simplified User Experience**: Removed preset clutter to focus on core CSS editing
+- **Professional Workflow**: Added VS Code-like autocomplete for better developer experience  
+- **Flexibility**: Users can write any CSS rather than being limited to preset options
+- **Performance**: Streamlined codebase with ~125 lines of preset code removed
+
 ## Key Implementation Details
 - Uses Chrome Storage sync API for cross-device persistence
 - Content script listens for storage changes and message passing
 - CSS injection is handled via dynamic style element creation
 - Extension only activates on Tana domains for security
+- Intelligent suggestion panel with efficient content updates and timer management
+- Focused architecture prioritizing custom CSS editing over preset functionality

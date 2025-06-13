@@ -1,7 +1,7 @@
 {
   "name": "tana-css-customizer",
-  "version": "1.0.0",
-  "description": "A powerful Chrome extension that allows you to customize the appearance of Tana with custom CSS. Features a professional code editor with syntax highlighting, linting, auto-completion, and real-time preview.",
+  "version": "1.1.0",
+  "description": "A powerful Chrome extension that allows you to customize the appearance of Tana with custom CSS. Features a professional code editor with syntax highlighting, intelligent auto-completion with type-ahead filtering, real-time linting, code formatting, and live preview.",
   "main": "popup.js",
   "scripts": {
     "build": "echo 'Chrome extension - no build required'",
@@ -24,8 +24,11 @@
     "productivity",
     "browser-extension",
     "code-editor",
+    "intelligent-autocomplete", 
+    "type-ahead",
+    "syntax-highlighting",
     "linting",
-    "auto-completion"
+    "code-formatting"
   ],
   "author": "Lisa Ross <your.email@example.com>",
   "license": "MIT",
