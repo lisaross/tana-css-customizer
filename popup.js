@@ -309,10 +309,14 @@ cssEditor.addEventListener('keydown', (e) => {
       return;
     }
     
-    // Close panel on any other key that would modify text
+    // For typing keys, update suggestions instead of closing panel
     if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
-      console.log('Closing panel due to text modification key:', e.key);
-      closeSuggestionPanel();
+      console.log('Text modification key pressed:', e.key, '- will update suggestions after text changes');
+      // Don't close panel, let the input event handler update suggestions
+      // Use setTimeout to wait for the text to actually change
+      setTimeout(() => {
+        updateSuggestionsFromCurrentText();
+      }, 10);
     }
   }
   
@@ -615,22 +619,23 @@ let selectedSuggestionIndex = -1;
 let currentSuggestions = [];
 let currentWord = '';
 
-function showPropertySuggestions() {
-  const cssProperties = [
-    'align-items', 'align-content', 'animation', 'animation-delay', 'animation-duration',
-    'background', 'background-color', 'background-image', 'background-size', 'background-position',
-    'border', 'border-radius', 'border-color', 'border-style', 'border-width',
-    'box-shadow', 'box-sizing', 'color', 'content', 'cursor', 'display', 'flex', 'flex-direction',
-    'flex-wrap', 'flex-grow', 'flex-shrink', 'font-family', 'font-size', 'font-weight',
-    'font-style', 'grid', 'grid-template-columns', 'grid-template-rows', 'grid-gap',
-    'height', 'justify-content', 'justify-items', 'line-height', 'list-style', 'margin',
-    'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'max-width', 'max-height',
-    'min-width', 'min-height', 'opacity', 'outline', 'overflow', 'overflow-x', 'overflow-y',
-    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'position',
-    'text-align', 'text-decoration', 'text-shadow', 'text-transform', 'transform', 'transition',
-    'transition-duration', 'transition-property', 'visibility', 'white-space', 'width', 'z-index'
-  ];
-  
+// CSS properties list
+const CSS_PROPERTIES = [
+  'align-items', 'align-content', 'animation', 'animation-delay', 'animation-duration',
+  'background', 'background-color', 'background-image', 'background-size', 'background-position',
+  'border', 'border-radius', 'border-color', 'border-style', 'border-width',
+  'box-shadow', 'box-sizing', 'color', 'content', 'cursor', 'display', 'flex', 'flex-direction',
+  'flex-wrap', 'flex-grow', 'flex-shrink', 'font-family', 'font-size', 'font-weight',
+  'font-style', 'grid', 'grid-template-columns', 'grid-template-rows', 'grid-gap',
+  'height', 'justify-content', 'justify-items', 'line-height', 'list-style', 'margin',
+  'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'max-width', 'max-height',
+  'min-width', 'min-height', 'opacity', 'outline', 'overflow', 'overflow-x', 'overflow-y',
+  'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'position',
+  'text-align', 'text-decoration', 'text-shadow', 'text-transform', 'transform', 'transition',
+  'transition-duration', 'transition-property', 'visibility', 'white-space', 'width', 'z-index'
+];
+
+function getCurrentWordAndPosition() {
   const start = cssEditor.selectionStart;
   const value = cssEditor.value;
   const lineStart = value.lastIndexOf('\n', start - 1) + 1;
@@ -638,23 +643,27 @@ function showPropertySuggestions() {
   const words = currentLine.trim().split(/\s+/);
   const lastWord = words[words.length - 1] || '';
   
+  return { lastWord, start, value, lineStart, currentLine };
+}
+
+function filterAndSortSuggestions(searchTerm) {
   // Filter properties that match the current typing (type-ahead support)
-  const searchTerm = lastWord.toLowerCase();
-  const suggestions = cssProperties.filter(prop => {
+  const suggestions = CSS_PROPERTIES.filter(prop => {
     const propLower = prop.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
     
     // Exact prefix match gets highest priority
-    if (propLower.startsWith(searchTerm)) {
+    if (propLower.startsWith(searchLower)) {
       return true;
     }
     
     // Contains match (type-ahead functionality)
-    if (propLower.includes(searchTerm)) {
+    if (propLower.includes(searchLower)) {
       return true;
     }
     
     // Fuzzy match for abbreviations (e.g., "ani" matches "animation")
-    const searchChars = searchTerm.split('');
+    const searchChars = searchLower.split('');
     let propIndex = 0;
     for (const char of searchChars) {
       const foundIndex = propLower.indexOf(char, propIndex);
@@ -665,16 +674,17 @@ function showPropertySuggestions() {
   }).sort((a, b) => {
     const aLower = a.toLowerCase();
     const bLower = b.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
     
     // Sort by relevance:
     // 1. Exact prefix matches first
-    if (aLower.startsWith(searchTerm) && !bLower.startsWith(searchTerm)) return -1;
-    if (!aLower.startsWith(searchTerm) && bLower.startsWith(searchTerm)) return 1;
+    if (aLower.startsWith(searchLower) && !bLower.startsWith(searchLower)) return -1;
+    if (!aLower.startsWith(searchLower) && bLower.startsWith(searchLower)) return 1;
     
     // 2. Then by contains matches (closer to start is better)
-    if (aLower.includes(searchTerm) && bLower.includes(searchTerm)) {
-      const aIndex = aLower.indexOf(searchTerm);
-      const bIndex = bLower.indexOf(searchTerm);
+    if (aLower.includes(searchLower) && bLower.includes(searchLower)) {
+      const aIndex = aLower.indexOf(searchLower);
+      const bIndex = bLower.indexOf(searchLower);
       if (aIndex !== bIndex) return aIndex - bIndex;
     }
     
@@ -682,12 +692,43 @@ function showPropertySuggestions() {
     return a.localeCompare(b);
   });
   
+  return suggestions;
+}
+
+function showPropertySuggestions() {
+  const { lastWord } = getCurrentWordAndPosition();
+  const suggestions = filterAndSortSuggestions(lastWord);
+  
   if (suggestions.length > 0) {
     currentSuggestions = suggestions;
     currentWord = lastWord;
     selectedSuggestionIndex = 0; // Select first item by default
     console.log('Setting up suggestions:', suggestions.length, 'items, selected index:', selectedSuggestionIndex);
     showSuggestionPanel(suggestions, lastWord);
+  }
+}
+
+function updateSuggestionsFromCurrentText() {
+  console.log('Updating suggestions from current text...');
+  const { lastWord } = getCurrentWordAndPosition();
+  
+  if (!lastWord || lastWord.length === 0) {
+    console.log('No word to search for, closing panel');
+    closeSuggestionPanel();
+    return;
+  }
+  
+  const suggestions = filterAndSortSuggestions(lastWord);
+  console.log('Found', suggestions.length, 'suggestions for:', lastWord);
+  
+  if (suggestions.length > 0) {
+    currentSuggestions = suggestions;
+    currentWord = lastWord;
+    selectedSuggestionIndex = 0; // Reset to first item
+    showSuggestionPanel(suggestions, lastWord);
+  } else {
+    console.log('No suggestions found, closing panel');
+    closeSuggestionPanel();
   }
 }
 
