@@ -273,6 +273,7 @@ cssEditor.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       e.stopPropagation();
+      console.log('ArrowDown: current index:', selectedSuggestionIndex, 'max:', currentSuggestions.length - 1);
       selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, currentSuggestions.length - 1);
       console.log('Moving down to index:', selectedSuggestionIndex);
       updateSuggestionSelection();
@@ -282,6 +283,7 @@ cssEditor.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       e.stopPropagation();
+      console.log('ArrowUp: current index:', selectedSuggestionIndex, 'min: 0');
       selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, 0);
       console.log('Moving up to index:', selectedSuggestionIndex);
       updateSuggestionSelection();
@@ -645,13 +647,16 @@ function showPropertySuggestions() {
     currentSuggestions = suggestions;
     currentWord = lastWord;
     selectedSuggestionIndex = 0; // Select first item by default
+    console.log('Setting up suggestions:', suggestions.length, 'items, selected index:', selectedSuggestionIndex);
     showSuggestionPanel(suggestions, lastWord);
   }
 }
 
 function showSuggestionPanel(suggestions, word) {
-  // Remove existing suggestion panel
-  closeSuggestionPanel();
+  // Remove existing suggestion panel but don't reset state yet
+  if (suggestionPanel && suggestionPanel.parentNode) {
+    suggestionPanel.remove();
+  }
   
   suggestionPanel = document.createElement('div');
   suggestionPanel.id = 'suggestion-panel';
