@@ -265,6 +265,55 @@ cssEditor.addEventListener('click', (e) => {
 cssEditor.addEventListener('keydown', (e) => {
   console.log('Key pressed:', e.key);
   
+  // Handle suggestion panel navigation
+  const activeSuggestionPanel = document.getElementById('suggestion-panel');
+  if (activeSuggestionPanel && activeSuggestionPanel.parentNode) {
+    console.log('Suggestion panel is active, handling key:', e.key);
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, currentSuggestions.length - 1);
+      console.log('Moving down to index:', selectedSuggestionIndex);
+      updateSuggestionSelection();
+      return;
+    }
+    
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, 0);
+      console.log('Moving up to index:', selectedSuggestionIndex);
+      updateSuggestionSelection();
+      return;
+    }
+    
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < currentSuggestions.length) {
+        const selectedSuggestion = currentSuggestions[selectedSuggestionIndex];
+        console.log('Inserting suggestion:', selectedSuggestion);
+        insertSuggestion(selectedSuggestion, currentWord);
+        closeSuggestionPanel();
+      }
+      return;
+    }
+    
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      closeSuggestionPanel();
+      return;
+    }
+    
+    // Close panel on any other key that would modify text
+    if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete') {
+      console.log('Closing panel due to text modification key:', e.key);
+      closeSuggestionPanel();
+    }
+  }
+  
   // Handle Tab key for indentation
   if (e.key === 'Tab') {
     e.preventDefault();
@@ -559,13 +608,25 @@ function formatCSS() {
 }
 
 // CSS Property suggestions
+let suggestionPanel = null;
+let selectedSuggestionIndex = -1;
+let currentSuggestions = [];
+let currentWord = '';
+
 function showPropertySuggestions() {
   const cssProperties = [
-    'align-items', 'animation', 'background', 'background-color', 'border', 'border-radius',
-    'box-shadow', 'color', 'cursor', 'display', 'flex', 'flex-direction', 'font-family',
-    'font-size', 'font-weight', 'grid', 'height', 'justify-content', 'line-height',
-    'margin', 'max-width', 'opacity', 'overflow', 'padding', 'position', 'text-align',
-    'text-decoration', 'transform', 'transition', 'visibility', 'width', 'z-index'
+    'align-items', 'align-content', 'animation', 'animation-delay', 'animation-duration',
+    'background', 'background-color', 'background-image', 'background-size', 'background-position',
+    'border', 'border-radius', 'border-color', 'border-style', 'border-width',
+    'box-shadow', 'box-sizing', 'color', 'content', 'cursor', 'display', 'flex', 'flex-direction',
+    'flex-wrap', 'flex-grow', 'flex-shrink', 'font-family', 'font-size', 'font-weight',
+    'font-style', 'grid', 'grid-template-columns', 'grid-template-rows', 'grid-gap',
+    'height', 'justify-content', 'justify-items', 'line-height', 'list-style', 'margin',
+    'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'max-width', 'max-height',
+    'min-width', 'min-height', 'opacity', 'outline', 'overflow', 'overflow-x', 'overflow-y',
+    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'position',
+    'text-align', 'text-decoration', 'text-shadow', 'text-transform', 'transform', 'transition',
+    'transition-duration', 'transition-property', 'visibility', 'white-space', 'width', 'z-index'
   ];
   
   const start = cssEditor.selectionStart;
@@ -581,80 +642,171 @@ function showPropertySuggestions() {
   );
   
   if (suggestions.length > 0) {
+    currentSuggestions = suggestions;
+    currentWord = lastWord;
+    selectedSuggestionIndex = 0; // Select first item by default
     showSuggestionPanel(suggestions, lastWord);
   }
 }
 
-function showSuggestionPanel(suggestions, currentWord) {
+function showSuggestionPanel(suggestions, word) {
   // Remove existing suggestion panel
-  const existing = document.getElementById('suggestion-panel');
-  if (existing) existing.remove();
+  closeSuggestionPanel();
   
-  const panel = document.createElement('div');
-  panel.id = 'suggestion-panel';
-  panel.style.cssText = `
+  suggestionPanel = document.createElement('div');
+  suggestionPanel.id = 'suggestion-panel';
+  suggestionPanel.style.cssText = `
     position: absolute;
     background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-height: 150px;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15), 0 2px 8px rgba(0,0,0,0.1);
+    max-height: 200px;
     overflow-y: auto;
     z-index: 1000;
-    font-size: 12px;
+    font-size: 13px;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    min-width: 200px;
+    backdrop-filter: blur(8px);
   `;
   
-  suggestions.slice(0, 10).forEach((suggestion, index) => {
+  // Add header
+  const header = document.createElement('div');
+  header.textContent = 'CSS Properties';
+  header.style.cssText = `
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 7px 7px 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  `;
+  suggestionPanel.appendChild(header);
+  
+  // Add suggestions
+  suggestions.slice(0, 12).forEach((suggestion, index) => {
     const item = document.createElement('div');
     item.textContent = suggestion;
+    item.className = 'suggestion-item';
+    item.dataset.index = index;
     item.style.cssText = `
-      padding: 4px 8px;
+      padding: 8px 12px;
       cursor: pointer;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #f0f0f0;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      font-weight: 400;
     `;
     
-    item.addEventListener('mouseenter', () => {
-      item.style.backgroundColor = '#f0f0f0';
-    });
+    // Highlight selected item
+    if (index === selectedSuggestionIndex) {
+      item.style.backgroundColor = '#667eea';
+      item.style.color = 'white';
+    }
     
-    item.addEventListener('mouseleave', () => {
-      item.style.backgroundColor = '';
+    item.addEventListener('mouseenter', () => {
+      selectedSuggestionIndex = index;
+      updateSuggestionSelection();
     });
     
     item.addEventListener('click', () => {
-      insertSuggestion(suggestion, currentWord);
-      panel.remove();
+      insertSuggestion(suggestion, word);
+      closeSuggestionPanel();
     });
     
-    panel.appendChild(item);
+    suggestionPanel.appendChild(item);
   });
   
-  // Position panel near the textarea
+  // Add footer with keyboard hints
+  const footer = document.createElement('div');
+  footer.innerHTML = '↑↓ Navigate • ⏎ Select • ⎋ Close';
+  footer.style.cssText = `
+    padding: 6px 12px;
+    background: #f8f9fa;
+    color: #666;
+    font-size: 10px;
+    border-radius: 0 0 7px 7px;
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+  `;
+  suggestionPanel.appendChild(footer);
+  
+  // Position panel near the cursor
   const rect = cssEditor.getBoundingClientRect();
-  panel.style.left = rect.left + 'px';
-  panel.style.top = (rect.top + 20) + 'px';
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
   
-  document.body.appendChild(panel);
+  suggestionPanel.style.left = (rect.left + scrollLeft + 10) + 'px';
+  suggestionPanel.style.top = (rect.top + scrollTop + 30) + 'px';
   
-  // Auto-hide after 5 seconds
+  document.body.appendChild(suggestionPanel);
+  
+  // Auto-hide after 10 seconds
   setTimeout(() => {
-    if (panel.parentNode) panel.remove();
-  }, 5000);
+    closeSuggestionPanel();
+  }, 10000);
 }
 
-function insertSuggestion(suggestion, currentWord) {
+function updateSuggestionSelection() {
+  const panel = document.getElementById('suggestion-panel');
+  if (!panel) {
+    console.log('No suggestion panel found for updating selection');
+    return;
+  }
+  
+  const items = panel.querySelectorAll('.suggestion-item');
+  console.log('Updating selection for index:', selectedSuggestionIndex, 'out of', items.length, 'items');
+  
+  items.forEach((item, index) => {
+    if (index === selectedSuggestionIndex) {
+      item.style.backgroundColor = '#667eea';
+      item.style.color = 'white';
+      item.style.fontWeight = '600';
+      item.scrollIntoView({ block: 'nearest' });
+      console.log('Selected item:', item.textContent);
+    } else {
+      item.style.backgroundColor = '';
+      item.style.color = '';
+      item.style.fontWeight = '400';
+    }
+  });
+}
+
+function closeSuggestionPanel() {
+  if (suggestionPanel && suggestionPanel.parentNode) {
+    suggestionPanel.remove();
+  }
+  suggestionPanel = null;
+  selectedSuggestionIndex = -1;
+  currentSuggestions = [];
+  currentWord = '';
+}
+
+function insertSuggestion(suggestion, word) {
   const start = cssEditor.selectionStart;
   const value = cssEditor.value;
   
   // Replace the current word with the suggestion
-  const beforeCursor = value.substring(0, start - currentWord.length);
+  const beforeCursor = value.substring(0, start - word.length);
   const afterCursor = value.substring(start);
   
   const newValue = beforeCursor + suggestion + ': ' + afterCursor;
   cssEditor.value = newValue;
-  cssEditor.setSelectionRange(start - currentWord.length + suggestion.length + 2, start - currentWord.length + suggestion.length + 2);
+  cssEditor.setSelectionRange(start - word.length + suggestion.length + 2, start - word.length + suggestion.length + 2);
   cssEditor.focus();
+  
+  // Trigger auto-save
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async () => {
+    try {
+      await chrome.storage.sync.set({ customCSS: cssEditor.value });
+    } catch (error) {
+      console.error('Error auto-saving CSS:', error);
+    }
+  }, 1000);
 }
 
 // Instructions toggle functionality
