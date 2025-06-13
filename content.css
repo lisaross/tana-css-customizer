@@ -1,0 +1,20 @@
+/* Default content CSS - minimal styling to ensure extension doesn't interfere */
+
+/* Ensure extension elements don't interfere with Tana */
+#tana-css-customizer {
+  /* This style element contains user's custom CSS */
+}
+
+/* Optional: Add a subtle indicator that the extension is active */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0.6;
+}

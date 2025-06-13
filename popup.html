@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 450px;
+      min-width: 350px;
+      max-width: 1200px;
+      min-height: 400px;
+      max-height: 1400px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      overflow: auto;
+      position: relative;
+      box-sizing: border-box;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    
+    .logo {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 4px;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .editor-container {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    #css-editor {
+      width: 100%;
+      min-height: 200px;
+      height: 300px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      resize: both;
+      box-sizing: border-box;
+      outline: none;
+      background-color: #fafafa;
+      color: #333;
+      tab-size: 2;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow-x: auto;
+    }
+    
+    #css-editor:focus {
+      outline: 2px solid #667eea;
+      border-color: #667eea;
+      background-color: white;
+    }
+    
+    #css-editor:hover {
+      border-color: #999;
+    }
+    
+    /* Add syntax highlighting via CSS (limited but works) */
+    #css-editor {
+      /* CSS comments will be styled via JS */
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .primary:hover {
+      background: #5a6fd8;
+    }
+    
+    .secondary {
+      background: #f8f9fa;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    
+    .secondary:hover {
+      background: #e9ecef;
+    }
+    
+    .status {
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 8px;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .presets {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e5e5;
+    }
+    
+    .preset-button {
+      width: 100%;
+      margin-bottom: 8px;
+      text-align: left;
+      background: #f8f9fa;
+      color: #495057;
+      border: 1px solid #dee2e6;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    
+    .preset-button:hover {
+      background: #e9ecef;
+    }
+    
+    .debug-section {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e5e5;
+    }
+    
+    .debug-info {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+    
+    #debug-content {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      background: white;
+      padding: 4px;
+      border-radius: 2px;
+      margin: 4px 0;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    
+    .instructions {
+      background: #f8f9ff;
+      border: 1px solid #e1e5f2;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .instructions h3 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .instructions ol {
+      margin: 0 0 12px 0;
+      padding-left: 18px;
+      font-size: 12px;
+    }
+    
+    .instructions li {
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    
+    .tips {
+      background: #fff;
+      border-radius: 4px;
+      padding: 8px;
+      font-size: 11px;
+    }
+    
+    .tips ul {
+      margin: 4px 0 0 0;
+      padding-left: 16px;
+    }
+    
+    .tips li {
+      margin-bottom: 2px;
+    }
+    
+    .instructions a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    
+    .instructions a:hover {
+      text-decoration: underline;
+    }
+    
+    .instructions code {
+      background: #f1f3f4;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 10px;
+    }
+    
+    .instructions.hidden {
+      display: none;
+    }
+    
+    .toggle-instructions {
+      background: none;
+      border: none;
+      color: #667eea;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-left: auto;
+    }
+    
+    .toggle-instructions:hover {
+      color: #5a6fd8;
+    }
+    
+    .resize-handle {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 16px;
+      height: 16px;
+      cursor: nw-resize;
+      z-index: 1000;
+      opacity: 0.3;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M16 16H13L16 13V16ZM16 11H10L16 5V11ZM16 6H7L16 -3V6Z" fill="%23999"/></svg>') no-repeat center;
+    }
+    
+    .resize-handle:hover {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo"></div>
+    <h1>Tana CSS Customizer</h1>
+    <button class="toggle-instructions" id="toggle-instructions">Hide Instructions</button>
+  </div>
+  
+  <div class="instructions">
+    <h3>How to Use:</h3>
+    <ol>
+      <li><strong>Navigate to Tana:</strong> Open <a href="https://app.tana.inc" target="_blank">app.tana.inc</a> in your browser</li>
+      <li><strong>Write CSS:</strong> Add your custom CSS in the editor below</li>
+      <li><strong>Apply Changes:</strong> Click "Apply CSS" to see your changes</li>
+      <li><strong>Use Presets:</strong> Try the quick presets below for common customizations</li>
+    </ol>
+    <div class="tips">
+      <strong>💡 Tips & Shortcuts:</strong>
+      <ul>
+        <li>Use <code>!important</code> to override Tana's default styles</li>
+        <li>Right-click and "Inspect Element" on Tana to find CSS selectors</li>
+        <li>Your CSS is auto-saved as you type</li>
+        <li><code>Tab</code> / <code>Shift+Tab</code> to indent/outdent lines</li>
+        <li><code>Ctrl/Cmd+L</code> to format CSS</li>
+        <li><code>Ctrl/Cmd+K</code> or <code>Ctrl+Space</code> for property suggestions</li>
+        <li>Auto-closes braces <code>{ }</code> and maintains indentation</li>
+        <li>Real-time linting shows errors and warnings</li>
+        <li>Drag the resize handle (bottom-right corner) to resize popup</li>
+        <li>Size preferences are automatically saved</li>
+        <li>Click "Hide/Show Instructions" to toggle this help section</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="editor-container">
+    <label for="css-editor">Custom CSS</label>
+    <textarea id="css-editor" placeholder="/* Start typing your CSS here... */">/* Add your custom CSS here */
+
+/* Example - Change text size: */
+.tana-node {
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
+
+/* Example - Customize sidebar: */
+.tana-sidebar {
+  background-color: #f8f9fa !important;
+  border-right: 2px solid #667eea !important;
+}
+
+/* Example - Style tags: */
+.tana-tag {
+  background-color: #667eea !important;
+  color: white !important;
+  border-radius: 12px !important;
+}
+
+/* Use browser dev tools to find more selectors! */</textarea>
+  </div>
+  
+  <div class="button-group">
+    <button id="apply-css" class="primary">Apply CSS</button>
+    <button id="clear-css" class="secondary">Clear</button>
+  </div>
+  
+  <div id="status" class="status" style="display: none;"></div>
+  
+  <div class="presets">
+    <label>Quick Presets</label>
+    <button class="preset-button" data-preset="dark-theme" title="Switch to dark mode with light text on dark backgrounds">🌙 Dark Theme</button>
+    <button class="preset-button" data-preset="larger-text" title="Increase font sizes for better readability">📝 Larger Text</button>
+    <button class="preset-button" data-preset="compact-view" title="Reduce spacing and padding for more content on screen">📦 Compact View</button>
+    <button class="preset-button" data-preset="custom-colors" title="Apply a custom purple color scheme">🎨 Custom Colors</button>
+  </div>
+  
+  <div class="debug-section">
+    <button id="toggle-debug" class="preset-button">Show Debug Info</button>
+    <div id="debug-panel" style="display: none;">
+      <div class="debug-info">
+        <strong>Debug Info:</strong><br>
+        <div id="debug-content">Click "Show Debug Info" to see details</div>
+        <br>
+        <small><strong>Dev Tools:</strong> Right-click extension icon → "Inspect popup"</small>
+      </div>
+    </div>
+  </div>
+  
+  <div class="resize-handle"></div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

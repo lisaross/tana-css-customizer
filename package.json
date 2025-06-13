@@ -1,0 +1,63 @@
+{
+  "name": "tana-css-customizer",
+  "version": "1.0.0",
+  "description": "A powerful Chrome extension that allows you to customize the appearance of Tana with custom CSS. Features a professional code editor with syntax highlighting, linting, auto-completion, and real-time preview.",
+  "main": "popup.js",
+  "scripts": {
+    "build": "echo 'Chrome extension - no build required'",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'Add linting here if needed'",
+    "validate": "echo 'Validating extension structure...' && node -e \"console.log(require('./manifest.json').name)\"",
+    "package": "zip -r tana-css-customizer.zip . -x '*.git*' 'node_modules/*' 'package-lock.json' '*.DS_Store*' '.vscode/*'",
+    "dev": "echo 'Load extension in Chrome via chrome://extensions/ in developer mode'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/tana-css-customizer.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "tana",
+    "css",
+    "customization",
+    "styling",
+    "productivity",
+    "browser-extension",
+    "code-editor",
+    "linting",
+    "auto-completion"
+  ],
+  "author": "Lisa Ross <your.email@example.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/tana-css-customizer/issues"
+  },
+  "homepage": "https://github.com/yourusername/tana-css-customizer#readme",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "extensionInfo": {
+    "manifestVersion": 3,
+    "targetBrowser": "Chrome",
+    "permissions": [
+      "storage",
+      "activeTab", 
+      "scripting",
+      "tabs"
+    ],
+    "hostPermissions": [
+      "https://app.tana.inc/*"
+    ]
+  },
+  "files": [
+    "manifest.json",
+    "popup.html",
+    "popup.js", 
+    "content.js",
+    "content.css",
+    "icons/",
+    "README.md",
+    "LICENSE"
+  ]
+}
