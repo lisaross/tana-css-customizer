@@ -69,9 +69,25 @@ Load the extension in Chrome:
 - **Auto-positioning**: Panel positioned intelligently near cursor
 - **Auto-hide**: Panel closes after 15 seconds of inactivity
 
+## Recent Major Changes
+
+### v1.1 - Enhanced Autocomplete & Simplified UI
+- **Removed**: Preset system (dark theme, larger text, compact view, custom colors)
+- **Added**: Intelligent CSS property autocomplete with type-ahead filtering
+- **Enhanced**: Professional suggestion panel with keyboard navigation
+- **Improved**: Real-time filtering and smart matching algorithms
+- **Focused**: Extension now concentrates on custom CSS editing rather than presets
+
+### Rationale for Changes
+- **Simplified User Experience**: Removed preset clutter to focus on core CSS editing
+- **Professional Workflow**: Added VS Code-like autocomplete for better developer experience  
+- **Flexibility**: Users can write any CSS rather than being limited to preset options
+- **Performance**: Streamlined codebase with ~125 lines of preset code removed
+
 ## Key Implementation Details
 - Uses Chrome Storage sync API for cross-device persistence
 - Content script listens for storage changes and message passing
 - CSS injection is handled via dynamic style element creation
 - Extension only activates on Tana domains for security
 - Intelligent suggestion panel with efficient content updates and timer management
+- Focused architecture prioritizing custom CSS editing over preset functionality
