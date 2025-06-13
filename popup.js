@@ -1,96 +1,9 @@
-// Preset CSS configurations
-const PRESETS = {
-  'dark-theme': `
-/* Dark Theme for Tana */
-body, .tana-app {
-  background-color: #1a1a1a !important;
-  color: #e0e0e0 !important;
-}
-
-.tana-sidebar {
-  background-color: #2d2d2d !important;
-  border-right: 1px solid #404040 !important;
-}
-
-.tana-node {
-  background-color: #1a1a1a !important;
-  color: #e0e0e0 !important;
-  border-color: #404040 !important;
-}
-
-.tana-editor {
-  background-color: #1a1a1a !important;
-  color: #e0e0e0 !important;
-}
-
-input, textarea {
-  background-color: #2d2d2d !important;
-  color: #e0e0e0 !important;
-  border-color: #404040 !important;
-}
-`,
-  'larger-text': `
-/* Larger Text for Better Readability */
-.tana-node {
-  font-size: 16px !important;
-  line-height: 1.6 !important;
-}
-
-.tana-sidebar {
-  font-size: 14px !important;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-size: 1.2em !important;
-}
-`,
-  'compact-view': `
-/* Compact View for More Content */
-.tana-node {
-  padding: 4px 8px !important;
-  margin: 2px 0 !important;
-  line-height: 1.3 !important;
-}
-
-.tana-sidebar {
-  width: 200px !important;
-  font-size: 12px !important;
-}
-
-.tana-editor {
-  padding: 8px !important;
-}
-`,
-  'custom-colors': `
-/* Custom Color Scheme */
-.tana-node {
-  border-left: 3px solid #667eea !important;
-  background-color: #f8f9ff !important;
-}
-
-.tana-sidebar {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-}
-
-a, .tana-link {
-  color: #667eea !important;
-}
-
-.tana-tag {
-  background-color: #667eea !important;
-  color: white !important;
-  border-radius: 12px !important;
-  padding: 2px 8px !important;
-}
-`
-};
 
 // DOM elements
 const cssEditor = document.getElementById('css-editor');
 const applyButton = document.getElementById('apply-css');
 const clearButton = document.getElementById('clear-css');
 const statusDiv = document.getElementById('status');
-const presetButtons = document.querySelectorAll('.preset-button');
 const toggleDebugButton = document.getElementById('toggle-debug');
 const debugPanel = document.getElementById('debug-panel');
 const debugContent = document.getElementById('debug-content');
@@ -275,16 +188,6 @@ clearButton.addEventListener('click', async () => {
   }
 });
 
-// Preset button handlers
-presetButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const presetName = button.dataset.preset;
-    if (PRESETS[presetName]) {
-      cssEditor.value = PRESETS[presetName];
-      showStatus(`${button.textContent} preset loaded`, 'success');
-    }
-  });
-});
 
 // Function to inject CSS into the page
 function injectCustomCSS(css) {
