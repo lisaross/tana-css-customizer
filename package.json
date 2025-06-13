@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/tana-css-customizer.git"
+    "url": "git+https://github.com/lisaross/tana-css-customizer.git"
   },
   "keywords": [
     "chrome-extension",
@@ -30,9 +30,9 @@
   "author": "Lisa Ross <your.email@example.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yourusername/tana-css-customizer/issues"
+    "url": "https://github.com/lisaross/tana-css-customizer/issues"
   },
-  "homepage": "https://github.com/yourusername/tana-css-customizer#readme",
+  "homepage": "https://github.com/lisaross/tana-css-customizer#readme",
   "devDependencies": {},
   "engines": {
     "node": ">=14.0.0"
